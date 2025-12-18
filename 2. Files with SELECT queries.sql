@@ -1,148 +1,145 @@
 2. File with SELECT queries
 
 SELECT 
-     title, duration
+    title, duration
 FROM 
-     Tracks
+    Tracks
 ORDER BY duration DESC
 LIMIT 1;
 
 SELECT 
-     title
+    title
 FROM 
-     Tracks
+    Tracks
 WHERE 
-     duration >= 210;
+    duration >= 210;
 
 SELECT 
-     title
+    title
 FROM 
-     Compilations
+    Compilations
 WHERE 
-     release_year BETWEEN 2018 AND 2020;
+    release_year BETWEEN 2018 AND 2020;
 
 SELECT 
-     name
+    name
 FROM 
-     Artists
+    Artists
 WHERE 
-     name NOT LIKE '% %';
+    name NOT LIKE '% %';
 
 SELECT 
-     title
+    title
 FROM 
-     Tracks
+    Tracks
 WHERE 
-     title 
-LIKE '%мой%' 
-     OR title LIKE '%my%';
+    title ILIKE 'my' 
+    OR title ILIKE 'my %' 
+    OR title ILIKE '% my' 
+    OR title ILIKE '% my %' 
+    OR title ILIKE 'oh my god' 
+    OR title ILIKE '% my'; 
+
 
 
 
 3. File with SELECT queries
 
 SELECT 
-     g.name, COUNT(ag.artist_id) AS artist_count
+    g.name, COUNT(ag.artist_id) AS artist_count
 FROM 
-     Genres g
+    Genres g
 LEFT JOIN 
-     Artists_Genres ag 
-     ON g.id = ag.genre_id
+    Artists_Genres ag ON g.id = ag.genre_id
 GROUP BY g.name;
 
 SELECT 
-     a.title, COUNT(t.id) AS track_count
+    COUNT(t.id)
 FROM 
-     Albums a
-LEFT JOIN 
-     Tracks t 
-     ON a.id = t.album_id
+    Albums a
+JOIN 
+    Tracks t ON a.id = t.album_id
 WHERE 
-     a.release_year BETWEEN 2019 AND 2020
+    a.release_year BETWEEN 2019 AND 2020;
+
+SELECT 
+    a.title, AVG(t.duration) AS average_duration
+FROM 
+    Albums a
+JOIN 
+    Tracks t ON a.id = t.album_id
 GROUP BY a.title;
 
 SELECT 
-     a.title, AVG(t.duration) AS average_duration
+    name
 FROM 
-     Albums a
-JOIN 
-     Tracks t 
-     ON a.id = t.album_id
-GROUP BY a.title;
+    Artists
+WHERE id NOT IN (
+    SELECT artist_id 
+    FROM Artists_Albums 
+    WHERE album_id IN (
+        SELECT id FROM Albums WHERE release_year = 2020
+    )
+);
 
 SELECT 
-     name
+    c.title
 FROM 
-     Artists
-WHERE id NOT IN (SELECT artist_id FROM Artists_Albums WHERE album_id IN (SELECT id FROM Albums WHERE release_year = 2020));
-
-SELECT 
-     c.title
-FROM 
-     Compilations c
+    Compilations c
 JOIN 
-     Compilation_Tracks ct 
-     ON c.id = ct.compilation_id
+    Compilation_Tracks ct ON c.id = ct.compilation_id
 JOIN 
-     Tracks t 
-     ON ct.track_id = t.id
+    Tracks t ON ct.track_id = t.id
 JOIN 
-     Artists_Albums aa 
-     ON t.album_id = aa.album_id
+    Artists_Albums aa ON t.album_id = aa.album_id
 WHERE 
-     aa.artist_id = (SELECT id FROM Artists WHERE name = 'Исполнитель 1');
+    aa.artist_id = (SELECT id FROM Artists WHERE name = 'Исполнитель 1');
 
 
 
 4. File with SELECT queries
 
 SELECT 
-     a.title
+    a.title
 FROM 
-     Albums a
+    Albums a
 JOIN 
-     Tracks t 
-     ON a.id = t.album_id
+    Tracks t ON a.id = t.album_id
 JOIN 
-     Artists_Albums aa 
-     ON a.id = aa.album_id
+    Artists_Albums aa ON a.id = aa.album_id
 JOIN 
-     Artists_Genres ag 
-     ON aa.artist_id = ag.artist_id
-GROUP BY a.title
+    Artists_Genres ag ON aa.artist_id = ag.artist_id
+GROUP BY a.title, aa.artist_id
 HAVING COUNT(DISTINCT ag.genre_id) > 1;
 
 SELECT 
-     t.title
+    t.title
 FROM 
-     Tracks t
+    Tracks t
 LEFT JOIN 
-     Compilation_Tracks ct 
-     ON t.id = ct.track_id
+    Compilation_Tracks ct ON t.id = ct.track_id
 WHERE 
-     ct.compilation_id IS NULL;
+    ct.compilation_id IS NULL;
 
 SELECT DISTINCT 
-     a.name
+    a.name
 FROM 
-     Artists a
+    Artists a
 JOIN 
-     Artists_Albums aa 
-     ON a.id = aa.artist_id
+    Artists_Albums aa ON a.id = aa.artist_id
 JOIN 
-     Albums al ON aa.album_id = al.id
+    Albums al ON aa.album_id = al.id
 JOIN 
-     Tracks t 
-     ON al.id = t.album_id
+    Tracks t ON al.id = t.album_id
 WHERE 
-     t.duration = (SELECT MIN(duration) FROM Tracks);
+    t.duration = (SELECT MIN(duration) FROM Tracks);
 
 SELECT 
-     a.title
+    a.title
 FROM 
-     Albums a
+    Albums a
 JOIN 
-     Tracks t ON a.id = t.album_id
+    Tracks t ON a.id = t.album_id
 GROUP BY a.title
 HAVING COUNT(t.id) = (
     SELECT MIN(track_count)
